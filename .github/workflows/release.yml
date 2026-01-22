@@ -1,0 +1,68 @@
+name: Auto Update and Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    name: Auto Version and Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update Version in PHP
+        run: |
+          # Get current version from file
+          CURRENT_VER=$(grep "Version:" auto-save-external-images.php | awk '{print $3}')
+          echo "Current Version: $CURRENT_VER"
+          
+          # Split version into parts
+          IFS='.' read -ra ADDR <<< "$CURRENT_VER"
+          MAJOR=${ADDR[0]}
+          MINOR=${ADDR[1]}
+          PATCH=${ADDR[2]}
+          
+          # Increment patch version
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VER="$MAJOR.$MINOR.$NEW_PATCH"
+          echo "New Version: $NEW_VER"
+          
+          # Update file
+          sed -i "s/Version:     $CURRENT_VER/Version:     $NEW_VER/g" auto-save-external-images.php
+          
+          # Set for next steps
+          echo "NEW_VER=$NEW_VER" >> $GITHUB_ENV
+
+      - name: Commit version change
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add auto-save-external-images.php
+          git commit -m "Auto increment version to ${{ env.NEW_VER }} [skip ci]" || echo "No changes to commit"
+          git push origin ${{ github.ref_name }}
+
+      - name: Create ZIP
+        run: |
+          mkdir -p auto-save-external-images
+          cp -r * auto-save-external-images/ || true
+          rm -rf auto-save-external-images/auto-save-external-images
+          zip -r auto-save-external-images.zip auto-save-external-images/
+
+      - name: Update Latest Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.NEW_VER }}
+          name: Release v${{ env.NEW_VER }}
+          body: "Tự động cập nhật phiên bản sau mỗi lần push. Bản dựng: ${{ github.sha }}"
+          files: auto-save-external-images.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}
+
