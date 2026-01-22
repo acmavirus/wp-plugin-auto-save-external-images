@@ -3,7 +3,7 @@
  * Plugin Name: Auto Save External Images
  * Plugin URI:  #
  * Description: Tự động tải ảnh từ link ngoài về host khi lưu bài viết hoặc sản phẩm.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      AcmaTvirus
  * Author URI:  #
  * License:     GPL2
