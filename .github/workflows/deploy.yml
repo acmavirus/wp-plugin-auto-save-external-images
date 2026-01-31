@@ -1,0 +1,44 @@
+name: Build and Auto Update Plugin
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with: { php-version: '8.1', tools: composer:v2 }
+
+      - name: Build Assets
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Version Detection
+        id: vars
+        run: |
+          VERSION=$(grep "Version:" auto-save-external-images.php | awk '{print $NF}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Stable Zip
+        run: |
+          mkdir auto-save-external-images
+          cp -r src vendor auto-save-external-images.php auto-save-external-images/
+          zip -r auto-save-external-images-${{ steps.vars.outputs.version }}.zip auto-save-external-images/
+
+      - name: Auto Release
+        uses: softprops/action-gh-release@v1
+        if: success()
+        with:
+          tag_name: ${{ steps.vars.outputs.tag_name }}
+          name: Release ${{ steps.vars.outputs.tag_name }}
+          files: auto-save-external-images-${{ steps.vars.outputs.version }}.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

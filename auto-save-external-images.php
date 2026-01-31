@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Auto Save External Images
  * Plugin URI:  #
@@ -10,10 +11,29 @@
  * Text Domain: auto-save-external-images
  */
 
+// Copyright by AcmaTvirus
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+/**
+ * Autoload dependencies
+ */
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
+
+/**
+ * Initialize Plugin
+ */
+if (class_exists('Acma\\AutoSaveExternalImages\\Plugin')) {
+    \Acma\AutoSaveExternalImages\Plugin::instance()->run();
+}
+
+/**
+ * Legacy compatibility
+ */
 class Auto_Save_External_Images
 {
 
@@ -32,7 +52,7 @@ class Auto_Save_External_Images
         add_action('manage_media_custom_column', array($this, 'render_media_product_column'), 10, 2);
         add_action('restrict_manage_posts', array($this, 'add_media_type_filter'));
         add_action('pre_get_posts', array($this, 'filter_media_by_parent_type'));
-        
+
         // GitHub Update Checker
         add_filter('pre_set_site_transient_update_plugins', array($this, 'check_for_updates'));
         add_filter('plugins_api', array($this, 'plugin_info'), 20, 3);
@@ -65,14 +85,14 @@ class Auto_Save_External_Images
         if ('upload' !== $screen->id) return;
 
         $current = isset($_GET['asei_filter']) ? $_GET['asei_filter'] : '';
-        ?>
+?>
         <select name="asei_filter">
             <option value=""><?php _e('Tất cả nguồn ảnh', 'asei'); ?></option>
             <option value="product" <?php selected($current, 'product'); ?>><?php _e('🖼️ Chỉ ảnh Sản phẩm', 'asei'); ?></option>
             <option value="post" <?php selected($current, 'post'); ?>><?php _e('📰 Chỉ ảnh Bài viết', 'asei'); ?></option>
             <option value="unattached" <?php selected($current, 'unattached'); ?>><?php _e('❓ Ảnh chưa liên kết', 'asei'); ?></option>
         </select>
-        <?php
+    <?php
     }
 
     // Filter logic for Media Library
@@ -121,7 +141,7 @@ class Auto_Save_External_Images
 
     public function render_admin_page()
     {
-        ?>
+    ?>
         <style>
             .asei-page-wrapper {
                 --p-primary: #6366f1;
@@ -391,7 +411,9 @@ class Auto_Save_External_Images
                 box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
             }
 
-            #asei-log-entries, #asei-scanner-log, #asei-seo-log {
+            #asei-log-entries,
+            #asei-scanner-log,
+            #asei-seo-log {
                 height: 250px;
                 overflow-y: auto;
                 font-family: 'JetBrains Mono', monospace;
@@ -413,9 +435,20 @@ class Auto_Save_External_Images
                 text-transform: uppercase;
             }
 
-            .bg-success { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-            .bg-info { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
-            .bg-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+            .bg-success {
+                background: rgba(16, 185, 129, 0.2);
+                color: #10b981;
+            }
+
+            .bg-info {
+                background: rgba(99, 102, 241, 0.2);
+                color: #6366f1;
+            }
+
+            .bg-error {
+                background: rgba(239, 68, 68, 0.2);
+                color: #ef4444;
+            }
         </style>
 
         <div class="asei-page-wrapper">
@@ -450,7 +483,8 @@ class Auto_Save_External_Images
                                 <button id="asei-run-btn" class="asei-start-button">
                                     <span>Kích hoạt hệ thống</span>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                        <polyline points="12 5 19 12 12 19" />
                                     </svg>
                                 </button>
                             </div>
@@ -471,7 +505,9 @@ class Auto_Save_External_Images
                                     </div>
                                 </div>
                                 <div class="asei-progress-box">
-                                    <div class="asei-progress-track"><div id="asei-fill" class="asei-progress-bar"></div></div>
+                                    <div class="asei-progress-track">
+                                        <div id="asei-fill" class="asei-progress-bar"></div>
+                                    </div>
                                     <div class="asei-status-labels">
                                         <span id="asei-task-text">Sẵn sàng...</span>
                                         <span id="asei-task-pct">0%</span>
@@ -488,7 +524,8 @@ class Auto_Save_External_Images
                             <div id="asei-scanner-setup" class="asei-view-setup">
                                 <div class="asei-illus" style="background: #fff7ed; color: #f97316;">
                                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                        <circle cx="11" cy="11" r="8" />
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
                                     </svg>
                                 </div>
                                 <p style="font-size: 18px; font-weight: 600; margin-bottom: 30px; max-width: 500px;">
@@ -497,7 +534,8 @@ class Auto_Save_External_Images
                                 <button id="asei-scan-btn" class="asei-start-button" style="background: #f97316 !important; box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.3) !important;">
                                     <span>Bắt đầu quét lỗi</span>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                        <polyline points="12 5 19 12 12 19" />
                                     </svg>
                                 </button>
                             </div>
@@ -522,13 +560,15 @@ class Auto_Save_External_Images
                                     </div>
                                 </div>
                                 <div class="asei-progress-box">
-                                    <div class="asei-progress-track"><div id="scan-fill" class="asei-progress-bar" style="background: linear-gradient(90deg, #f97316, #ef4444);"></div></div>
+                                    <div class="asei-progress-track">
+                                        <div id="scan-fill" class="asei-progress-bar" style="background: linear-gradient(90deg, #f97316, #ef4444);"></div>
+                                    </div>
                                     <div class="asei-status-labels">
                                         <span id="scan-task-text">Đang chuẩn bị...</span>
                                         <span id="scan-task-pct">0%</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="asei-broken-table-wrapper" id="broken-links-container" style="display:none;">
                                     <table class="asei-broken-table">
                                         <thead>
@@ -559,7 +599,8 @@ class Auto_Save_External_Images
                                 <button id="asei-seo-btn" class="asei-start-button" style="background: #0891b2 !important; box-shadow: 0 15px 25px -5px rgba(8, 145, 178, 0.3) !important;">
                                     <span>Bắt đầu đánh dấu SEO</span>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                        <polyline points="12 5 19 12 12 19" />
                                     </svg>
                                 </button>
                             </div>
@@ -580,7 +621,9 @@ class Auto_Save_External_Images
                                     </div>
                                 </div>
                                 <div class="asei-progress-box">
-                                    <div class="asei-progress-track"><div id="seo-fill" class="asei-progress-bar" style="background: linear-gradient(90deg, #0891b2, #06b6d4);"></div></div>
+                                    <div class="asei-progress-track">
+                                        <div id="seo-fill" class="asei-progress-bar" style="background: linear-gradient(90deg, #0891b2, #06b6d4);"></div>
+                                    </div>
                                     <div class="asei-status-labels">
                                         <span id="seo-task-text">Đang chuẩn bị...</span>
                                         <span id="seo-task-pct">0%</span>
@@ -610,7 +653,8 @@ class Auto_Save_External_Images
                                 <button id="asei-content-btn" class="asei-start-button" style="background: #db2777 !important; box-shadow: 0 15px 25px -5px rgba(219, 39, 119, 0.3) !important;">
                                     <span>Bắt đầu kiểm tra nội dung</span>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                        <polyline points="12 5 19 12 12 19" />
                                     </svg>
                                 </button>
                             </div>
@@ -631,13 +675,15 @@ class Auto_Save_External_Images
                                     </div>
                                 </div>
                                 <div class="asei-progress-box">
-                                    <div class="asei-progress-track"><div id="content-fill" class="asei-progress-bar" style="background: linear-gradient(90deg, #db2777, #ec4899);"></div></div>
+                                    <div class="asei-progress-track">
+                                        <div id="content-fill" class="asei-progress-bar" style="background: linear-gradient(90deg, #db2777, #ec4899);"></div>
+                                    </div>
                                     <div class="asei-status-labels">
                                         <span id="content-task-text">Đang chuẩn bị...</span>
                                         <span id="content-task-pct">0%</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="asei-broken-table-wrapper" id="content-issues-container" style="display:none;">
                                     <table class="asei-broken-table">
                                         <thead>
@@ -657,7 +703,7 @@ class Auto_Save_External_Images
         </div>
 
         <script>
-            jQuery(document).ready(function ($) {
+            jQuery(document).ready(function($) {
                 // Tab switching
                 $('.asei-tab-btn').on('click', function() {
                     $('.asei-tab-btn').removeClass('active');
@@ -670,8 +716,8 @@ class Auto_Save_External_Images
                 let current = 0;
                 let updated = 0;
 
-                $('#asei-run-btn').on('click', function () {
-                    $('#asei-view-setup').fadeOut(300, function () {
+                $('#asei-run-btn').on('click', function() {
+                    $('#asei-view-setup').fadeOut(300, function() {
                         $('#asei-view-running').fadeIn(400);
                         startWorker();
                     });
@@ -686,7 +732,7 @@ class Auto_Save_External_Images
                             nonce: '<?php echo wp_create_nonce("asei_bulk_nonce"); ?>',
                             offset: current
                         },
-                        success: function (res) {
+                        success: function(res) {
                             if (res.success) {
                                 if (res.data.finished) {
                                     $('#asei-task-text').html('<span style="color: #10b981">✨ HOÀN TẤT!</span>');
@@ -722,8 +768,8 @@ class Auto_Save_External_Images
                 let broken_count = 0;
                 let fixed_count = 0;
 
-                $('#asei-scan-btn').on('click', function () {
-                    $('#asei-scanner-setup').fadeOut(300, function () {
+                $('#asei-scan-btn').on('click', function() {
+                    $('#asei-scanner-setup').fadeOut(300, function() {
                         $('#asei-scanner-running').fadeIn(400);
                         startScanner();
                     });
@@ -738,7 +784,7 @@ class Auto_Save_External_Images
                             nonce: '<?php echo wp_create_nonce("asei_bulk_nonce"); ?>',
                             offset: scan_offset
                         },
-                        success: function (res) {
+                        success: function(res) {
                             if (res.success) {
                                 if (res.data.finished) {
                                     $('#scan-task-text').html('<span style="color: #10b981">✨ QUÉT HOÀN TẤT!</span>');
@@ -766,7 +812,7 @@ class Auto_Save_External_Images
                                             broken_count++;
                                             $('#scan-broken').text(broken_count);
                                         }
-                                        
+
                                         let row = `
                                             <tr>
                                                 <td><strong>#${item.post_id}</strong><br><small>${item.title}</small></td>
@@ -787,8 +833,8 @@ class Auto_Save_External_Images
                 let seo_offset = 0;
                 let seo_marked_count = 0;
 
-                $('#asei-seo-btn').on('click', function () {
-                    $('#asei-seo-setup').fadeOut(300, function () {
+                $('#asei-seo-btn').on('click', function() {
+                    $('#asei-seo-setup').fadeOut(300, function() {
                         $('#asei-seo-running').fadeIn(400);
                         startSeoMarking();
                     });
@@ -803,7 +849,7 @@ class Auto_Save_External_Images
                             nonce: '<?php echo wp_create_nonce("asei_bulk_nonce"); ?>',
                             offset: seo_offset
                         },
-                        success: function (res) {
+                        success: function(res) {
                             if (res.success) {
                                 if (res.data.finished) {
                                     $('#seo-task-text').html('<span style="color: #10b981">✨ ĐÁNH DẤU HOÀN TẤT!</span>');
@@ -839,8 +885,8 @@ class Auto_Save_External_Images
                 let content_offset = 0;
                 let bad_content_count = 0;
 
-                $('#asei-content-btn').on('click', function () {
-                    $('#asei-content-setup').fadeOut(300, function () {
+                $('#asei-content-btn').on('click', function() {
+                    $('#asei-content-setup').fadeOut(300, function() {
                         $('#asei-content-running').fadeIn(400);
                         startContentChecker();
                     });
@@ -855,7 +901,7 @@ class Auto_Save_External_Images
                             nonce: '<?php echo wp_create_nonce("asei_bulk_nonce"); ?>',
                             offset: content_offset
                         },
-                        success: function (res) {
+                        success: function(res) {
                             if (res.success) {
                                 if (res.data.finished) {
                                     $('#content-task-text').html('<span style="color: #10b981">✨ KIỂM TRA HOÀN TẤT!</span>');
@@ -877,9 +923,9 @@ class Auto_Save_External_Images
                                     d.issues.forEach(item => {
                                         bad_content_count++;
                                         $('#content-bad').text(bad_content_count);
-                                        
+
                                         let tagsHtml = item.strange_tags.map(tag => `<code style="background:#fff1f2; color:#be123c; padding:2px 6px; border-radius:4px; margin-right:5px; margin-bottom:5px; display:inline-block;">&lt;${tag}&gt;</code>`).join('');
-                                        
+
                                         let row = `
                                             <tr>
                                                 <td>
@@ -911,7 +957,7 @@ class Auto_Save_External_Images
                 }
             });
         </script>
-        <?php
+<?php
     }
 
     public function ajax_check_content()
@@ -933,11 +979,28 @@ class Auto_Save_External_Images
         $total_posts = (int)wp_count_posts('post')->publish + (int)wp_count_posts('product')->publish;
 
         $allowed_tags = array(
-            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
-            'p', 'strong', 'b', 'em', 'i', 'blockquote', 
-            'ul', 'ol', 'li', 
-            'img', 'figure', 'figcaption', 'iframe', 
-            'a', 'article', 'section',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'p',
+            'strong',
+            'b',
+            'em',
+            'i',
+            'blockquote',
+            'ul',
+            'ol',
+            'li',
+            'img',
+            'figure',
+            'figcaption',
+            'iframe',
+            'a',
+            'article',
+            'section',
             'br' // Exception
         );
 
@@ -947,13 +1010,13 @@ class Auto_Save_External_Images
             while ($query->have_posts()) {
                 $query->the_post();
                 $content = get_the_content();
-                
+
                 // Find all tags
                 preg_match_all('/<([a-z1-6]+)/i', $content, $matches);
                 if (!empty($matches[1])) {
                     $tags = array_unique(array_map('strtolower', $matches[1]));
                     $strange_tags = array_diff($tags, $allowed_tags);
-                    
+
                     if (!empty($strange_tags)) {
                         $issues[] = array(
                             'post_id' => get_the_ID(),
@@ -1009,7 +1072,7 @@ class Auto_Save_External_Images
                 $content = get_the_content();
                 $original_content = $content;
                 $post_updated = false;
-                
+
                 preg_match_all('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $content, $matches);
                 if (!empty($matches[1])) {
                     $urls = array_unique($matches[1]);
@@ -1119,7 +1182,7 @@ class Auto_Save_External_Images
                 $post_title = get_the_title();
                 $content = get_the_content();
                 $original_content = $content;
-                
+
                 preg_match_all('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $content, $matches);
                 if (!empty($matches[1])) {
                     $urls = array_unique($matches[1]);
@@ -1132,19 +1195,19 @@ class Auto_Save_External_Images
 
                         // Update Alt/Title in content
                         $pattern = '/<img([^>]+)src=["\']' . preg_quote($url, '/') . '["\']([^>]*)>/i';
-                        
+
                         // Check if already has alt/title
                         if (preg_match($pattern, $content, $img_matches)) {
                             $img_tag = $img_matches[0];
                             $new_img_tag = $img_tag;
-                            
+
                             // Remove existing alt/title to avoid duplicates
                             $new_img_tag = preg_replace('/alt=["\'][^"\']*["\']/i', '', $new_img_tag);
                             $new_img_tag = preg_replace('/title=["\'][^"\']*["\']/i', '', $new_img_tag);
-                            
+
                             // Add new alt/title
                             $new_img_tag = str_replace('<img', '<img alt="' . esc_attr($label) . '" title="' . esc_attr($label) . '"', $new_img_tag);
-                            
+
                             $content = str_replace($img_tag, $new_img_tag, $content);
                         }
 
@@ -1153,7 +1216,7 @@ class Auto_Save_External_Images
                         if ($attachment_id) {
                             // Update Alt/Title
                             update_post_meta($attachment_id, '_wp_attachment_image_alt', $label);
-                            
+
                             $update_data = array(
                                 'ID' => $attachment_id,
                                 'post_title' => $label,
@@ -1168,7 +1231,7 @@ class Auto_Save_External_Images
 
                             wp_update_post($update_data);
                         }
-                        
+
                         $marked_count++;
                         $count++;
                     }
@@ -1355,15 +1418,16 @@ class Auto_Save_External_Images
     /**
      * Check for updates from GitHub
      */
-    public function check_for_updates($transient) {
+    public function check_for_updates($transient)
+    {
         if (empty($transient->checked)) {
             return $transient;
         }
 
-        $repo_user = 'AcmaTvirus'; 
+        $repo_user = 'AcmaTvirus';
         $repo_name = 'auto-save-external-images';
         $url = "https://api.github.com/repos/$repo_user/$repo_name/releases/latest";
-        
+
         $args = array(
             'timeout' => 10,
             'headers' => array(
@@ -1380,12 +1444,12 @@ class Auto_Save_External_Images
 
         $release = json_decode(wp_remote_retrieve_body($response));
         $new_version = str_replace('v', '', $release->tag_name);
-        $current_version = '1.0.0'; 
+        $current_version = '1.0.0';
 
         if (version_compare($current_version, $new_version, '<')) {
             $plugin_slug = plugin_basename(__FILE__);
             $package_url = '';
-            
+
             if (!empty($release->assets)) {
                 foreach ($release->assets as $asset) {
                     if (strpos($asset->name, '.zip') !== false) {
@@ -1411,7 +1475,8 @@ class Auto_Save_External_Images
     /**
      * Provide plugin info for the update popup
      */
-    public function plugin_info($res, $action, $args) {
+    public function plugin_info($res, $action, $args)
+    {
         if ($action !== 'plugin_information') {
             return false;
         }
@@ -1420,7 +1485,7 @@ class Auto_Save_External_Images
             $repo_user = 'AcmaTvirus';
             $repo_name = 'auto-save-external-images';
             $url = "https://api.github.com/repos/$repo_user/$repo_name/releases/latest";
-            
+
             $response = wp_remote_get($url, array(
                 'headers' => array('User-Agent' => 'WordPress-Plugin')
             ));
@@ -1434,7 +1499,7 @@ class Auto_Save_External_Images
                 $res->author = 'AcmaTvirus';
                 $res->homepage = "https://github.com/$repo_user/$repo_name";
                 $res->download_link = '';
-                
+
                 if (!empty($release->assets)) {
                     foreach ($release->assets as $asset) {
                         if (strpos($asset->name, '.zip') !== false) {
@@ -1443,7 +1508,7 @@ class Auto_Save_External_Images
                         }
                     }
                 }
-                
+
                 $res->sections = array(
                     'description' => $release->body,
                     'changelog' => 'Xem chi tiết trên GitHub.'
